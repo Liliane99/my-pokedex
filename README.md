@@ -1,3 +1,8 @@
+Front 
+<img width="1470" alt="Capture d’écran 2025-01-09 à 11 21 06" src="https://github.com/user-attachments/assets/219c64e2-2448-4836-a2c0-f2bb1ee1a6fc" />
+<img width="1470" alt="Capture d’écran 2025-01-09 à 11 21 10" src="https://github.com/user-attachments/assets/ca7a7d3d-9186-4b34-94af-c35ce0df6432" />
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
