@@ -1,38 +1,57 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { getPokemons, getTypes } from "../utils/api";
+import React, { use, useEffect, useState } from "react";
+import { getPokemons, getPokemonsCorrection, getTypes } from "../utils/api";
 import PokemonCard from "../components/PokemonCard";
 
 const PokemonList = () => {
   const [pokemons, setPokemons] = useState([]);
   const [filteredPokemons, setFilteredPokemons] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(undefined); // mettre les valeurs à undefined permet à axios de les ignorer
   const [types, setTypes] = useState([]);
-  const [selectedType, setSelectedType] = useState("");
+  const [selectedType, setSelectedType] = useState(undefined);
   const [limit, setLimit] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const [pokemonsData, typesData] = await Promise.all([
+  //         getPokemons({}),
+  //         getTypes(),
+  //       ]);
+  //       setPokemons(pokemonsData);
+  //       setFilteredPokemons(pokemonsData.slice(0, limit));
+  //       setTypes(typesData);
+  //       setLoading(false);
+  //     } catch (error) {
+  //       console.error("Error loading data:", error);
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, [limit]);
+
+  const fetchPokemons = async () => {
+    const data = await getPokemonsCorrection({
+      name: searchTerm,
+      typeId: selectedType,
+      limit,
+      page,
+    });
+    setPokemons([...pokemons, ...data]);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [pokemonsData, typesData] = await Promise.all([
-          getPokemons({}),
-          getTypes(),
-        ]);
-        setPokemons(pokemonsData);
-        setFilteredPokemons(pokemonsData.slice(0, limit));
-        setTypes(typesData);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        setLoading(false);
-      }
-    };
+    fetchPokemons();
+  }, [searchTerm, selectedType, limit, page]);
 
-    fetchData();
-  }, [limit]);
-
+  /**
+   * Pourquoi faire des handle différent pour ensuite appeler la même fonction filterPokemons ?
+   */
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = event.target.value.toLowerCase();
     setSearchTerm(searchValue);
@@ -50,6 +69,7 @@ const PokemonList = () => {
     setLimit(newLimit);
   };
 
+  // utiliser l'API
   const filterPokemons = (search: string, type: string) => {
     let filtered = pokemons;
 
@@ -69,7 +89,8 @@ const PokemonList = () => {
   };
 
   const loadMorePokemons = () => {
-    setLimit(limit + 10); 
+    // setLimit(limit + 10);
+    setPage(page + 1);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -84,12 +105,12 @@ const PokemonList = () => {
         <input
           type="text"
           placeholder="Tape le petit nom de ton pokemon ici"
-          value={searchTerm}
+          value={searchTerm ?? ""}
           onChange={handleSearchChange}
           className="search-input"
         />
         <select
-          value={selectedType}
+          value={selectedType ?? ""}
           onChange={handleTypeChange}
           className="type-select"
         >
@@ -112,8 +133,13 @@ const PokemonList = () => {
       </div>
 
       <div className="pokemon-list">
-        {filteredPokemons.length > 0 ? (
-          filteredPokemons.map((pokemon) => (
+        {pokemons.length > 0 ? (
+          pokemons.map((pokemon) => (
+            /**
+             * pas forcément une bonne idée ici le spread operator, comme tu ne type pas ton component de l'autre côté,
+             * tu ne maitrise pas vraiment ce qui arrive dans les props
+             * j'aurais donnée une props pokemon, que j'aurais déconstructuré dans le component en typant la prop
+             */
             <PokemonCard key={pokemon.id} {...pokemon} />
           ))
         ) : (
